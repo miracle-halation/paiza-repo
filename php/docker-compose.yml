@@ -1,0 +1,38 @@
+version: "3"
+services:
+  mysql:
+    image: mysql:8.0.28
+    container_name: paiza-mysql
+    restart: always
+    environment:
+      MYSQL_ROOT_PASSWORD: password
+      MYSQL_DATABASE: exam
+      MYSQL_USER: guest_user
+      MYSQL_PASSWORD: guest_password
+      TZ: Japan
+    ports:
+      - 13306:3306
+    volumes:
+      - ./docker/db/data:/var/lib/mysql
+      - ./docker/db/my.cnf:/etc/mysql/conf.d/my.cnf
+      - ./docker/db/initdb.d:/docker-entrypoint-initdb.d
+  php:
+    container_name: paiza-php
+    build: ./infra/php
+    volumes:
+      - ./infra/php/php.ini:/usr/local/etc/php/php.ini
+      - ./src:/var/www/html
+    ports:
+      - 8080:80
+  phpmyadmin:
+    image: phpmyadmin/phpmyadmin
+    container_name: paiza-phpmyadmin
+    environment:
+      - PMA_ARBITRARY=1
+      - PMA_HOST=mysql
+      - PMA_USER=guest_user
+      - PMA_PASSWORD=guest_password
+    ports:
+      - 4040:80
+    volumes:
+      - ./phpmyadmin/sessions:/sessions
